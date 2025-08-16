@@ -6,28 +6,17 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <limits.h>
+#include <assert.h>
 
 #include "EscSeq.h"
 #include "htmlTags.h"
 
-#define SPECIFICATOR '$'
-#define SPEC_CLOSE '/'
+#define SPEC_OPEN       '<'
+#define SPEC_DIVIDER    ';'
+#define SPEC_CLOSE      '>'
 
-#define SPEC_RST '0'
-#define SPEC_BLD '#'
-#define SPEC_ITA '*'
 
-#define SPEC_BLK 'x'
-#define SPEC_RED 'r'
-#define SPEC_GRN 'g'
-#define SPEC_YLW 'y'
-#define SPEC_BLU 'b'
-#define SPEC_MGN 'm'
-#define SPEC_CYN 'c'
-#define SPEC_WHT 'w'
-#define SPEC_DFT 'd'
-
+#define NAME_MAX 255
 
 FILE* log_start (const char* fname);
 
