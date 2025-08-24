@@ -20,7 +20,7 @@
 
 FILE* log_start (const char* fname);
 
-int log_string (const char* format, ...) __attribute__((format(printf, 1, 2)));
+int log_string (const char* format, ...);
 
 void log_close();
 
@@ -45,6 +45,9 @@ const char* get_log();
         __func__,\
         ##__VA_ARGS__\
     )
+
+
+void memDump (const void* pointer, size_t words);
 
 
 #endif

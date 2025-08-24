@@ -5,13 +5,11 @@ CFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-eq
 			-Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo\
 			-Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG\
 			-D_EJUDGE_CLIENT_SIDE
-
 BUILD_DIR = build
-TARGET = assert.exe
+TARGET = logger.exe
 
-SRC_DIRS = . logger kassert
-SRCS = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
-OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRCS))
+SRCS = main.c logger.c
+OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 all: $(TARGET)
 
@@ -19,13 +17,13 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
 $(BUILD_DIR)/%.o: %.c
-	@if not exist $(subst /,\,$(dir $@)) mkdir $(subst /,\,$(dir $@))
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@if exist $(subst /,\,$(BUILD_DIR)) rmdir /s /q $(subst /,\,$(BUILD_DIR))
-	@if exist $(TARGET) del /q $(TARGET)
+	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
+	@if exist "$(TARGET)" del /q "$(TARGET)"
+
+.PHONY: all clean
 
 rebuild: clean all
-
-.PHONY: all clean rebuild

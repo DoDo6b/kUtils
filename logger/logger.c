@@ -32,19 +32,18 @@ FILE* log_start (const char* fname)
 }
 
 
-static unsigned long djb2Hash (const char* str)
+static unsigned long djb2Hash (const char* hashable, size_t size)
 {
-    if (!str)
+    if (!hashable)
     {
         print_stderr ("internal error", "can't get hash(NULL received)\n");
         return 0;
     }
     unsigned long hash = 5381;
-    int c;
-
-    while ((c = *str++))
+    
+    for (; *hashable && size > 0; hashable++, size--)
     {
-        hash = ((hash << 5) + hash) + c;
+        hash = (hash << 5) + hash + *hashable;
     }
 
     return hash;
@@ -72,28 +71,28 @@ enum SPECS_
 
 #define CASE_SPEC_(spec) case spec: fprintf(LogStream, ( (LogStream == stdout || LogStream == stderr) ? ESC_ ## spec : HTML_ ## spec) ); break
 
-static void print_spec (const char* spec)
+static void print_spec (const char* spec, size_t len)
 {
     assert (spec);
-    switch (djb2Hash (spec))
-        {
-            CASE_SPEC_(RESET);
-            CASE_SPEC_(BOLD);
-            CASE_SPEC_(BOLD_CLOSE);
-            CASE_SPEC_(ITALIC);
-            CASE_SPEC_(ITALIC_CLOSE);
-            CASE_SPEC_(BLACK);
-            CASE_SPEC_(RED);
-            CASE_SPEC_(GREEN);
-            CASE_SPEC_(YELLOW);
-            CASE_SPEC_(BLUE);
-            CASE_SPEC_(CYAN);
-            CASE_SPEC_(MAGENTA);
-            CASE_SPEC_(WHITE);
-            CASE_SPEC_(DEFAULT);
+    switch (djb2Hash (spec, len))
+    {
+        CASE_SPEC_(RESET);
+        CASE_SPEC_(BOLD);
+        CASE_SPEC_(BOLD_CLOSE);
+        CASE_SPEC_(ITALIC);
+        CASE_SPEC_(ITALIC_CLOSE);
+        CASE_SPEC_(BLACK);
+        CASE_SPEC_(RED);
+        CASE_SPEC_(GREEN);
+        CASE_SPEC_(YELLOW);
+        CASE_SPEC_(BLUE);
+        CASE_SPEC_(CYAN);
+        CASE_SPEC_(MAGENTA);
+        CASE_SPEC_(WHITE);
+        CASE_SPEC_(DEFAULT);
 
-            default:    fprintf(LogStream, "%c%s%c", SPEC_OPEN, spec, SPEC_CLOSE);
-        }
+        default:    fprintf(LogStream, "%c%s%c", SPEC_OPEN, spec, SPEC_CLOSE);
+    }
 }
 
 #undef CASE_SPEC_
@@ -104,14 +103,11 @@ static size_t parse_spec (const char* substr)
     size_t collected = 0;
 
     substr++;
-    char buffer[BUFSIZ] = "";
 
-    for (collected = 0; *substr != '\0' && *substr != SPEC_CLOSE && collected < sizeof(buffer); collected++, substr++) buffer[collected] = *substr;
-    collected += 2;
+    for (collected = 0; substr[collected] != '\0' && substr[collected] != SPEC_CLOSE; collected++);
+    print_spec (substr, collected);
 
-    print_spec (buffer);
-
-    return collected;
+    return collected + 2;
 }
 
 int log_string (const char* format, ...)
@@ -152,4 +148,28 @@ void log_close()
 const char* get_log()
 {
     return LogFile;
+}
+
+
+
+void memDump (const void* pointer, size_t byteSize)
+{
+    const unsigned char* ptr        =   (const unsigned char*)pointer;
+
+    log_string ("  Memory dump of %p(%zu byte(s))\n", pointer, byteSize);
+    log_string ("  {\n    ");
+    
+    log_string ("<blk>");
+    for (size_t i = 0; i < byteSize; i++)
+    {
+        log_string ("%02zX ", i);
+    }
+    log_string ("<dft>\n    <cyn>");
+
+    for (size_t i=0; i < byteSize; i++)
+    {
+        log_string ("%02X ", *(ptr+i));
+    }
+        
+    log_string ("<dft>\n  }\n");
 }
